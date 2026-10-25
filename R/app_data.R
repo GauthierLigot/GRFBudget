@@ -3,14 +3,14 @@ create_app_data <- function() {
   reactiveValues(
     
     salary = data.frame(
-      employee = c("John","Mary"),
-      year = c(2026,2026),
-      fte = c(1,0.8),
-      salary = c(50000,42000),
-      comment = c("","")
+      employee = character(),
+      year = numeric(),
+      fte = numeric(),
+      salary = numeric(),
+      comment = character()
     ),
     
-    projects = data.frame(
+    project = data.frame(
       otp = character(),
       project_code = character(),
       project_name = character(),

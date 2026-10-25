@@ -1,6 +1,6 @@
 library(shiny)
 
-projects_ui <- function(id){
+project_ui <- function(id){
   
   ns <- NS(id)
   
@@ -13,7 +13,7 @@ projects_ui <- function(id){
   )
 }
 
-projects_server <- function(id,app_data){
+project_server <- function(id,app_data){
   
   moduleServer(id, function(input, output, session){
     
