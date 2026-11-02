@@ -1,0 +1,10 @@
+name: grfbudget
+title:
+username: gauthierligot
+account: gauthierligot
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 18339954
+bundleId: 12769605
+url: https://gauthierligot.shinyapps.io/grfbudget/
+version: 1
