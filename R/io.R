@@ -1,14 +1,11 @@
 save_input <- function(app_data,file) {
   message("Building workbook...")
   t1 <- Sys.time()
-  
   wb<-get_input(app_data)
   message(Sys.time() - t1)
   message("Saving workbook...")
   wb_save(wb,file,overwrite = TRUE)
   message(Sys.time() - t1)
-  
-  return(wb)
 }
 
 export_intput <- function(app_data,file) {
