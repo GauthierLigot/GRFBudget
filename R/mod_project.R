@@ -6,7 +6,7 @@ project_ui <- function(id){
   
   tagList(
     
-    h3("Project management"),
+    # h3("Project management"),
     DT::DTOutput(ns("project_table")),
     br(),
     div(class = "d-flex gap-2",
@@ -69,7 +69,7 @@ project_server <- function(id,app_data){
       
       df <- app_data$project
       
-      print(df)
+      # print(df)
       
       duplicates <- df |>
         dplyr::count(project_code) |>
@@ -81,10 +81,11 @@ project_server <- function(id,app_data){
         "✓ No duplicate project_code"
       } else {
         paste(c("⚠ Duplicate project_code:",duplicates$project_code),collapse = "\n")
-      }})
+      }
+      })
     
     output$project_table <- DT::renderDT(DT::datatable(
-      app_data$project,  editable = TRUE, selection = "single") |>
+      app_data$project,  editable = TRUE, selection = "multiple") |>
         DT::formatRound(columns = "budget", digits = 0))
   })
   

@@ -5,7 +5,7 @@ salary_ui <- function(id){
   ns <- NS(id)
   
   tagList(
-    h3("Salary"),
+    # h3("Salary"),
     DT::DTOutput(ns("salary_table")),
     br(),
     div(class = "d-flex gap-2",
@@ -91,35 +91,8 @@ salary_server <- function(id, app_data){
       
     })
     output$validation <- renderText({
-      
-      df <- app_data$salary
-      
-      duplicates <- df |>
-        dplyr::count(employee, year) |>
-        dplyr::filter(n > 1)
-      
-      if (nrow(duplicates) == 0) {
-        "✓ No duplicate employee/year combinations"
-      } else {
-        
-        paste(
-          c(
-            "⚠ Duplicate employee/year combinations:",
-            apply(
-              duplicates,
-              1,
-              function(x)
-                paste(
-                  "-",
-                  x["employee"],
-                  x["year"]
-                )
-            )
-          ),
-          collapse = "\n"
-        )
-        
-      }})
+        check_salary_duplicates(app_data)
+    })
     
     # observe({
     #   
@@ -133,7 +106,7 @@ salary_server <- function(id, app_data){
     
     
     output$salary_table <- DT::renderDT(DT::datatable(
-      app_data$salary,  editable = TRUE, selection = "single", filter = "top") |>
+      app_data$salary,  editable = TRUE, selection = "multiple", filter = "top") |>
       DT::formatRound(columns = "salary", digits = 0))
       
       

@@ -29,7 +29,6 @@ create_app_data <- function() {
       comment = character()
     ),
     
-    current_file = "data/current_data.xlsx"
-  )
+    current_file = "data/current_data.xlsx")
   
 }
