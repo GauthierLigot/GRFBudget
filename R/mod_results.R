@@ -117,7 +117,7 @@ results_server <- function(id, app_data, output_data){
     
     output$output_table <- DT::renderDT(output_data$sum_project %>%
                                           left_join(select(app_data$project,project_code,start_date,end_date),by="project_code")%>%
-                                          filter(start_date >= ymd(input$mindate),
+                                          filter(end_date >= ymd(input$mindate),
                                                  start_date <= ymd(input$maxdate))%>%
                                           select(-start_date,-end_date)%>%
                                           DT::datatable(editable = FALSE, filter = "top") |>

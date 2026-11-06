@@ -2,7 +2,14 @@ library(openxlsx2)
 source("R/io.R")
 source("R/compute.R")
 source("R/output_data.R")
+
 app_data<-list()
+
+app_data$salary<-read_xlsx("c:/Users/gligot/Desktop/20261103_GRFbudget_InputData_scénario catastrophe.xlsx", sheet = "salary")
+app_data$allocation<-read_xlsx("c:/Users/gligot/Desktop/20261103_GRFbudget_InputData_scénario catastrophe.xlsx", sheet = "allocation")
+app_data$project<-read_xlsx("c:/Users/gligot/Desktop/20261103_GRFbudget_InputData_scénario catastrophe.xlsx", sheet = "project")
+
+
 app_data$salary<-read_xlsx("data/current_data.xlsx", sheet = "salary")
 app_data$allocation<-read_xlsx("data/current_data.xlsx", sheet = "allocation")
 app_data$project<-read_xlsx("data/current_data.xlsx", sheet = "project")

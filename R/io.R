@@ -30,6 +30,7 @@ get_input <- function(app_data){
 
 load_input <- function(app_data, file) {
   
+  print(file)
   if (!file.exists(file)) return()
   
   app_data$salary <- read_xlsx(file, sheet = "salary")

@@ -22,7 +22,8 @@ file_server <- function(id, app_data, output_data){
   moduleServer(id, function(input, output, session){
     
     observeEvent(input$open_input_file, {
-      load_input(app_data,input$open_file$datapath)
+      # print(input$open_input_file$datapath)
+      load_input(app_data,input$open_input_file$datapath)
     })
     
     observeEvent(input$save_input_file, {
