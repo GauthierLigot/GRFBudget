@@ -20,7 +20,6 @@ allocation_server <- function(id, app_data, output_data){
   moduleServer(id, function(input, output, session){
     
     page_length <- 10
-    dropdown_cols <- c("project_code", "employee")
     
     # ---- Allowed values (reactive: table re-renders only if these change) ----
     choices <- reactive({
@@ -29,8 +28,6 @@ allocation_server <- function(id, app_data, output_data){
         employee     = sort(unique(na.omit(app_data$salary$employee)))
       )
     })
-    
-    
     
     # ---- Initial render: isolate() so edits never trigger a re-render ----
     output$allocation_table <- DT::renderDT({
@@ -94,7 +91,7 @@ allocation_server <- function(id, app_data, output_data){
       refresh_table()
       
       # optional: jump to the last page to see the new row
-      DT::selectPage(proxy, ceiling(nrow(app_data$allocation) / 10))
+      DT::selectPage(proxy, ceiling(nrow(app_data$allocation) / page_length))
     })
     
     # ---- Delete ----

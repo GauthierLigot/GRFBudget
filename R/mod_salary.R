@@ -21,6 +21,8 @@ salary_server <- function(id, app_data){
   
   moduleServer(id, function(input, output, session){
     
+    page_length <- 10
+    
     observeEvent(input$add_row, {
       
       new_row <- data.frame(
@@ -31,18 +33,21 @@ salary_server <- function(id, app_data){
         comment = ""
       )
       
-      app_data$salary <- rbind(
-        app_data$salary,
-        new_row
-      )
+      app_data$salary <- rbind(app_data$salary,new_row)
+      refresh_table()
+      # jump to the last page to see the new row
+      DT::selectPage(proxy, ceiling(nrow(app_data$salary) / page_length))
       
     })
+    
     observeEvent(input$delete_row, {
       row <- input$salary_table_rows_selected
       if(length(row) > 0){
-        app_data$salary <- app_data$salary[-row, ]
+        app_data$salary <- app_data$salary[-row, ,drop=FALSE]
+        refresh_table()
       }
     })
+    
     observeEvent(input$salary_table_cell_edit, {
       
       info <- input$salary_table_cell_edit
@@ -52,26 +57,16 @@ salary_server <- function(id, app_data){
       
       current_col <- app_data$salary[[col]]
       
-      if (is.numeric(current_col)) {
+      if (is.integer(current_col)) {value <- as.integer(value)
+      }else if (is.numeric(current_col)) {
         value <- as.numeric(value)
       }
       
-      if (is.integer(current_col)) {
-        value <- as.integer(value)
-      }
-      
       app_data$salary[row, col] <- value
-      
+      # refresh_table()
     })
-    # observeEvent(input$save, {
-    #   save_workbook(app_data)
-    # })
-    # observeEvent(input$load, {
-    #   load_workbook(app_data)
-    # })
-    # observeEvent(input$export, {
-    #   export_workbook(app_data)
-    # })
+    
+    
     output$salary_plot <- renderPlot({
       
       req(nrow(app_data$salary) > 0)
@@ -90,24 +85,36 @@ salary_server <- function(id, app_data){
               axis.title.x=element_blank())
       
     })
+    
     output$validation <- renderText({
         check_salary_duplicates(app_data)
     })
     
-    # observe({
-    #   
-    #   cat(
-    #     "Rows in salary table:",
-    #     nrow(app_data$salary),
-    #     "\n"
-    #   )
-    #   
-    # })
+    output$salary_table <- DT::renderDT({
+      
+      dat<-isolate(app_data$salary)
+      
+      DT::datatable(dat,  editable = TRUE, 
+                    selection = "multiple", 
+                    #filter = "top",
+                    options = list(pageLength = page_length, stateSave = TRUE, searching = TRUE)) |>
+        DT::formatRound(columns = "salary", digits = 0)
+      }#, server = FALSE (seems a bad idea with filters)
+      )
     
+    proxy <- DT::dataTableProxy("salary_table")
     
-    output$salary_table <- DT::renderDT(DT::datatable(
-      app_data$salary,  editable = TRUE, selection = "multiple", filter = "top") |>
-      DT::formatRound(columns = "salary", digits = 0))
+    # Helper: push data to the table without resetting page / filters
+    refresh_table <- function(){
+      DT::replaceData(
+        proxy,
+        app_data$salary,
+        resetPaging    = FALSE,
+        clearSelection = "none"
+      )
+    }
+    
+    observeEvent(app_data$salary, refresh_table(), ignoreInit = TRUE)
       
       
   })
