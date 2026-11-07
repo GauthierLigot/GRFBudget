@@ -95,7 +95,7 @@ salary_server <- function(id, app_data){
       dat<-isolate(app_data$salary)
       
       DT::datatable(dat,  editable = TRUE, 
-                    selection = "multiple", 
+                    selection = "single", 
                     #filter = "top",
                     options = list(pageLength = page_length, stateSave = TRUE, searching = TRUE)) |>
         DT::formatRound(columns = "salary", digits = 0)

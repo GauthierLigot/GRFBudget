@@ -120,7 +120,7 @@ results_server <- function(id, app_data, output_data){
                                           filter(end_date >= ymd(input$mindate),
                                                  start_date <= ymd(input$maxdate))%>%
                                           select(-start_date,-end_date)%>%
-                                          DT::datatable(editable = FALSE, filter = "top") |>
+                                          DT::datatable(editable = FALSE) |> # filter = "top") |>
                                           DT::formatRound(columns = c("budget","expense","net"), digits = 0))
     
   })

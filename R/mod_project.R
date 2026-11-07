@@ -88,7 +88,7 @@ project_server <- function(id,app_data){
       
       dat<-isolate(app_data$project)
       
-      DT::datatable(dat,  editable = TRUE, selection = "multiple",
+      DT::datatable(dat,  editable = TRUE, selection = "single",
                     options = list(pageLength = page_length, stateSave = TRUE, searching = TRUE)) |>
         DT::formatRound(columns = "budget", digits = 0)
       })
