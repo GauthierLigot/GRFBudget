@@ -99,7 +99,7 @@ salary_server <- function(id, app_data){
                     #filter = "top",
                     options = list(pageLength = page_length, stateSave = TRUE, searching = TRUE)) |>
         DT::formatRound(columns = "salary", digits = 0)
-      }#, server = FALSE (seems a bad idea with filters)
+      }
       )
     
     proxy <- DT::dataTableProxy("salary_table")

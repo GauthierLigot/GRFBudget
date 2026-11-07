@@ -20,6 +20,7 @@ allocation_server <- function(id, app_data, output_data){
   moduleServer(id, function(input, output, session){
     
     page_length <- 10
+    dropdown_cols <- c("project_code", "employee")
     
     # ---- Allowed values (reactive: table re-renders only if these change) ----
     choices <- reactive({
@@ -34,17 +35,65 @@ allocation_server <- function(id, app_data, output_data){
       
       dat <- isolate(app_data$allocation)
       ch <- choices()
+      idx <- match(dropdown_cols, names(dat))   
+      
+      js_choices <- jsonlite::toJSON(
+        setNames(unname(ch[dropdown_cols]), as.character(idx)),
+        auto_unbox = FALSE
+      )
+      
+      callback <- DT::JS(paste0("
+  var choices = ", js_choices, ";
+  var inputId = '", session$ns("select_edit"), "';
+
+  // Capture phase on the table node: runs BEFORE DT's own dblclick editor
+table.table().node().addEventListener('dblclick', function(e){
+    var td = $(e.target).closest('tbody td')[0];
+    if (!td) return;
+
+    var cell = table.cell(td);
+    if (!cell.index()) return;
+    var col = cell.index().column;
+    if (!(col in choices)) return;          // other columns: DT edits normally
+
+    // Dropdown column: DT's text editor must never open
+    e.stopImmediatePropagation();
+    e.preventDefault();
+
+    if ($(td).find('select').length) return; // dropdown already open
+
+    var current = cell.data();
+    var shown   = current;
+    var rn      = table.row(cell.index().row).data()[0];   // row name
+
+    var $sel = $('<select style=\"width:100%\"></select>');
+    $('<option>').val('').text('\u2014 select \u2014').prop('disabled', true).appendTo($sel);
+    choices[col].forEach(function(x){
+      $('<option>').val(x).text(x).appendTo($sel);
+    });
+    $sel.val(current);
+    $(td).empty().append($sel);
+    $sel.focus();
+
+    $sel.on('change', function(){
+      shown = $sel.val();
+      Shiny.setInputValue(inputId, {rowname: rn, col: col, value: shown},
+                          {priority: 'event'});
+      $(td).text(shown);
+    });
+    $sel.on('blur', function(){ $(td).text(shown); });
+
+  }, true);   // <- true = capture phase
+"))
       
      DT::datatable(
         dat,
-        filter    = "top",
-        selection = "multiple",
-        editable  = list(
-          target  = "cell",
-          date    = which(names(dat) %in% c("start_date", "end_date"))
-        ),
+        # filter    = "top",
+        selection = "single",
+        callback = callback,
+        editable  = list(target  = "cell", date    = which(names(dat) %in% c("start_date", "end_date"))),
         options = list(pageLength = page_length, stateSave = TRUE, searching = TRUE)
-      )
+        )
     })
     
     proxy <- DT::dataTableProxy("allocation_table")
@@ -59,6 +108,31 @@ allocation_server <- function(id, app_data, output_data){
       )
     }
     
+    # dropdown menu observer
+    observeEvent(input$select_edit, {
+      info <- input$select_edit
+      row  <- match(as.character(info$rowname), rownames(app_data$allocation))
+      
+      if (is.na(row)) {
+        showNotification("Could not find the row to update.", type = "error")
+        return()
+      }
+      
+      col_name <- names(app_data$allocation)[info$col]
+      allowed  <- choices()[[col_name]]
+      
+      if (!(info$value %in% allowed)) {
+        showNotification(
+          paste0("'", info$value, "' is not a valid ", col_name, "."),
+          type = "error"
+        )
+        refresh_table()    # revert the cell to the stored value
+        return()
+      }
+      
+      set_cell(row, info$col, info$value)
+    })
+    
     # ---- Shared setter with type coercion ----
     set_cell <- function(row, col, value){
       current_col <- app_data$allocation[[col]]
@@ -68,20 +142,13 @@ allocation_server <- function(id, app_data, output_data){
       else if (is.numeric(current_col))    value <- as.numeric(value)
       
       app_data$allocation[row, col] <- value
-      refresh_table()
     }
-    
-    # ---- Dropdown edits ----
-    observeEvent(input$select_edit, {
-      info <- input$select_edit
-      set_cell(info$row, info$col, info$value)
-    })
     
     # ---- Add ----
     observeEvent(input$add_row, {
       new_row <- data.frame(
-        project_code = "",
-        employee     = "",
+        project_code = NA_character_,
+        employee     = NA_character_,
         start_date   = as.Date(NA),
         end_date     = as.Date(NA),
         fte          = 0,
@@ -106,6 +173,13 @@ allocation_server <- function(id, app_data, output_data){
     # ---- Cell edit: update the data only, NOT the widget ----
     observeEvent(input$allocation_table_cell_edit, {
       info  <- input$allocation_table_cell_edit
+      
+      if (names(app_data$allocation)[info$col] %in% dropdown_cols) {
+        showNotification("Please use the dropdown for this column.", type = "warning")
+        refresh_table()     # revert the cell
+        return()
+      }
+      
       set_cell(info$row, info$col, info$value)
     })
     
