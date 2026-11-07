@@ -15,11 +15,13 @@ source("R/validation_warnings.R")
 source("R/compute.R")
 
 #TODO 
+# améliorer les tables salary and projects (so they don't refresh on edits)
 # debugger (possibly because of column with date format or erroneously deleted code???)
 # define the table in the output data (particularly sum_project)
 # it stops before launching the compute function, likely because tables are empty
 # the compute functions returns nothing and update output data. check that it is the right way
 # work on date format in the table
+# https://stackoverflow.com/questions/60828661/how-to-create-a-dropdown-list-in-a-shiny-table-using-datatable-when-editing-the/60845695#60845695
 
 ui <- page_navbar(
   title = "GRF Budget",
